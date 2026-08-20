@@ -1,0 +1,17 @@
+systemctl list-units --type=service --state=running
+cd /etc/systemd/system
+
+python manage.py makemigrations
+
+python manage.py migrate
+
+
+
+
+
+source venv/bin/activate
+
+python manage.py collectstatic --noinput
+
+sudo systemctl restart supermercado.service
+

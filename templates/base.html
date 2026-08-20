@@ -1,0 +1,156 @@
+{% load static %}{% load socialaccount %}<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon_cart_kix.png' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermercado Itatingax - Economia Real no Ecossistema</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script>
+        window.csrfToken = "{{ csrf_token }}";
+    </script>
+    <script src="{% static 'js/script.js' %}" defer></script>
+</head>
+<body>
+    
+    <button class="theme-toggle-btn" id="theme-toggle" title="Alternar Tema">☀️</button>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo">🛒 Supermercado --Itatingax--</div>
+            <span class="kix-badge">Membro do Ecossistema KIX</span>
+        </div>
+
+        <div class="cart-status-widget">
+            <span>🛒 <strong id="cart-counter">0</strong> itens</span>
+            <span class="sats-counter">⚡ <span id="cart-total-sats">0</span> Sats</span>
+            <button id="btn-clear-cart" class="btn-remove" style="display: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; border: none; cursor: pointer;">🗑️ Limpar</button>
+            <button id="btn-pay" class="btn-pay" style="display: none;">Pagar</button>
+        </div>
+
+        <div class="auth-box">
+    {% if user.is_authenticated %}
+        <div class="user-logged" style="display: flex; align-items: center; gap: 10px;">
+            <span>Olá, <strong>{{ user.email }}</strong></span>
+            
+            <a href="{% url 'editar_perfil' %}" 
+               style="background: transparent; border: 1px solid #f7931a; color: #f7931a; padding: 4px 10px; border-radius: 4px; font-size: 12px; text-decoration: none; transition: 0.3s;">
+               Editar Endereço
+            </a>
+
+            <a href="{% url 'account_logout' %}" class="btn-logout">Sair</a>
+        </div>
+    {% else %}
+        {% get_providers as socialaccount_providers %}
+        {% if socialaccount_providers %}
+            <a href="{% provider_login_url 'google' %}" class="btn-auth">Entrar com o Google</a>
+        {% else %}
+            <!-- Fallback para a rota padrao de login do Django / Allauth -->
+            <a href="{% url 'account_login' %}" class="btn-auth">Entrar</a>
+        {% endif %}
+    {% endif %}
+</div>
+    </header>
+
+    <div class="banner">
+        <h2>⚡ Pagamento Nativo em Satoshis</h2>
+        <p>Logística integrada ao <strong>Ecossistema KIX</strong>. Economia real direto no caixa utilizando a eficiência da Lightning Network.</p>
+        
+        <div class="banner-cotacao" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);">
+            {% if btc_preco %}
+                <p>Preço atual do Bitcoin: <strong>R$ {{ btc_preco|floatformat:2 }}</strong></p>
+            {% endif %}
+            <p style="font-size: 0.95em; color: #ffb703;">
+                💡 É possível pagar utilizando o <strong>Pix estatal</strong>, mas o valor pagando direto em <strong>Satoshis é 10% menor</strong>!
+            </p>
+        </div>
+    </div>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <div id="pay-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            
+            <div id="step-confirm-address">
+                <h3>📍 Confirmar Entrega</h3>
+                <div style="background: #222; padding: 15px; border-radius: 6px; margin: 10px 0; text-align: left;">
+                    <p><strong>WhatsApp:</strong> <span id="user-phone">Carregando...</span></p>
+                    <p><strong>Endereço:</strong> <span id="user-address">Carregando...</span></p>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <a href="/perfil/editar/" class="btn-secondary" style="flex: 1; text-align: center; background: #444; color: #fff; padding: 10px; border-radius: 4px; text-decoration: none; font-size: 14px;">
+                        ✏️ Corrigir Dados
+                    </a>
+                </div>
+
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <button id="btn-proceed-to-payment" class="btn-pay" style="background: #f2a900; color: #000; width: 100%;">
+                        ⚡ Pagar Nativo com KIX (10% de Desconto)
+                    </button>
+                    
+                    <button id="btn-pix-estatal" class="btn-pay" style="background: #32b3a2; color: #fff; width: 100%;">
+                        📱 Pagar pelo PIX-Estatal (+10% Taxa)
+                    </button>
+                </div>
+            </div>
+
+            <div id="step-payment" style="display: none; text-align: center;">
+                <h3 style="margin-bottom: 15px; color: #f2a900;">⚡ Checkout KIX</h3>
+                <p style="font-size: 14px; margin-bottom: 5px; color: var(--texto-secundario);">Total a pagar:</p>
+                <p style="font-size: 22px; font-weight: bold; margin-top: 0; color: #fff;"><span id="modal-total-sats-display">0</span> sats</p>
+                
+                <div class="qr-container" style="background: #fff; padding: 12px; border-radius: 12px; display: inline-block; margin: 15px auto; min-width: 150px; min-height: 150px;">
+                </div>
+
+                <div style="background: #111; padding: 10px; border-radius: 6px; border: 1px solid #333; margin: 15px 0;">
+                    <span style="font-size: 11px; color: #888; display: block; margin-bottom: 5px; text-align: left;">Código Copia e Cola:</span>
+                    <div class="invoice-text" style="font-family: monospace; font-size: 11px; color: #aaa; word-break: break-all; max-height: 60px; overflow-y: auto; text-align: left; padding-right: 5px;">
+                        Aguardando dados...
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                    <button id="btn-confirm-mock" class="btn-pay" style="display: none; width: 100%; background: #27ae60; color: #fff;">
+                        Confirmar 
+                    </button>
+                    <button id="btn-retry-invoice" class="btn-pay" style="display: none; width: 100%; background: #e74c3c; color: #fff;">
+                        🔄 Tentar Novamente
+                    </button>
+                </div>
+            </div>
+
+            <div id="step-pix-estatal" style="display: none;">
+                <h3>🏛️ Checkout PIX Estatal</h3>
+                
+                <div class="pix-qr-container" style="text-align: center; margin: 15px 0;">
+                </div>
+
+                <div style="background: #222; padding: 15px; border-radius: 6px; margin: 10px 0; text-align: left; font-size: 15px;">
+                    <p>Subtotal do Carrinho: <span id="pix-subtotal-sats">0</span> sats</p>
+                    <p style="color: #ff5555;">⚠️ Taxa de Submissão Estatal: +10%</p>
+                    <p>Cotação utilizada: <strong style="color: #f2a900;">R$ <span id="pix-btc-cotacao">0</span></strong></p>
+                    <hr style="border-color: #333;">
+                    <p style="font-size: 18px;">Total a pagar: <strong style="color: #32b3a2;">R$ <span id="pix-total-reais">0,00</span></strong></p>
+                </div>
+                
+                <div style="background: #111; padding: 12px; border: 1px dashed #32b3a2; border-radius: 4px; margin-bottom: 15px;">
+                    <p style="margin: 0; font-size: 13px; color: #aaa;">Chave PIX E-mail:</p>
+                    <code style="font-size: 16px; color: #fff; display: block; margin-top: 5px; word-break: break-all;">pereelt@gmail.com</code>
+                </div>
+                
+                <p style="font-size: 12px; color: #888; font-style: italic;">Envie o valor exato em Reais. O processamento estatal pode levar até 3 dias úteis para homologação fiscal.</p>
+            </div>
+
+        </div>
+    </div>
+    <input type="hidden" id="btc-price-hidden" value="{{ btc_preco|stringformat:".2f" }}">
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

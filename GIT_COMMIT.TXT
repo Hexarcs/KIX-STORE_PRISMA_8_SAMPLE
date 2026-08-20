@@ -1,0 +1,8 @@
+# 1. Adiciona todos os arquivos sanitizados
+git add .
+
+# 2. Faz o commit limpo
+git commit -m "Initial commit - KIX Store Prisma 8 Sample (Sanitizado)"
+
+# 3. Envia para o repositório no GitHub
+git push -u origin main

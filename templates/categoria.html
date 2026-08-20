@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <header style="margin-bottom: 20px;">
+        <a href="{% url 'home' %}" class="btn-back">⬅ Voltar para o Início</a>
+    </header>
+
+    <div class="section-title">Produtos: {{ nome|title }}</div>
+
+    <div class="products-grid">
+        {% for product in produtos %}
+        <div class="product-card">
+            <div>
+                <div class="product-img">
+                    {% if product.imagem %}
+                        <img src="{{ product.imagem.url }}" alt="{{ product.nome }}">
+                    {% else %}
+                        <div class="product-icon-fallback">{{ product.icone|default:"📦" }}</div>
+                    {% endif %}
+                </div>
+                <div class="product-name">{{ product.nome }}</div>
+            </div>
+
+            <div>
+                <div class="price-box">
+                    <div class="price-sats">⚡ {{ product.preco_sats }} Sats</div>
+                    <div class="price-brl">
+                        Ref: R$ {{ product.preco_brl }} (+10% R$ {{ product.preco_pix_estatal }} - via PIX-estatal)
+                    </div>
+                </div>
+                <div class="cart-controls">
+                    <button class="btn-qty btn-remove" data-product-id="{{ product.sku }}">—</button>
+                    <span class="product-qty" id="qty_{{ product.sku }}">0</span>
+                    <button class="btn-qty btn-add"
+                            data-product-id="{{ product.sku }}"
+                            data-name="{{ product.nome }}"
+                            data-price-sats="{{ product.preco_sats }}">+</button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p style="grid-column: 1 / -1; text-align: center; color: var(--texto-secundario); padding: 30px;">
+                Nenhum produto encontrado nesta categoria.
+            </p>
+        {% endfor %}
+    </div>
+
+{% endblock %}
