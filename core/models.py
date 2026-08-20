@@ -140,3 +140,24 @@ class HomeConfig(models.Model):
 
     def __str__(self):
         return "Banner Hero da Home"
+
+#==============================bagde e nome do site===================
+
+#from django.db import models
+
+class SiteConfig(models.Model):
+    nome_loja = models.CharField(max_length=100, default="Supermercado Itatingax")
+    badge_ecossistema = models.CharField(max_length=100, default="Membro do Ecossistema KIX")
+
+    def save(self, *args, **kwargs):
+        # Garante que sempre haverá apenas uma linha de configuração (Singleton)
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Configurações do Site"        

@@ -43,3 +43,19 @@ class CotacaoBitcoinAdmin(admin.ModelAdmin):
 @admin.register(HomeConfig)
 class HomeConfigAdmin(admin.ModelAdmin):
     list_display = ('titulo_hero', 'ativo')    
+    
+    
+#from django.contrib import admin
+from .models import SiteConfig
+
+@admin.register(SiteConfig)
+class SiteConfigAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        # Impede criar mais de uma instância de configuração
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        # Impede deletar o registro de configuração principal
+        return False    
