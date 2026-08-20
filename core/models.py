@@ -171,6 +171,23 @@ class SiteConfig(models.Model):
 
     def __str__(self):
         return "Configurações do Site"        
+    
+    
+#---------categorias------------------
+
+from django.db import models
+
+class CategoriaCard(models.Model):
+    titulo = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True, help_text="Ex: frescos, mercearia, higiene, limpeza")
+    imagem_fundo = models.ImageField(upload_to='banners_cards/', help_text="Imagem de fundo do card")
+    ordem = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['ordem']
+
+    def __str__(self):
+        return self.titulo    
 
 
 

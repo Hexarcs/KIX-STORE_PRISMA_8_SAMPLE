@@ -23,7 +23,7 @@
 
     <div class="section-title">Navegue pelas Macro Categorias</div>
     <div class="section-subtitle">Todo o estoque do supermercado organizado de forma inteligente</div>
-
+<!--  </div>
     <div class="categories-grid">
         <a href="{% url 'categoria_detalhe' 'frescos' %}" class="category-card card-frescos">
             <h3>Frescos e Perecíveis</h3>
@@ -37,7 +37,23 @@
         <a href="{% url 'categoria_detalhe' 'limpeza' %}" class="category-card card-limpeza">
             <h3>Limpeza e Bazar</h3>
         </a>
-    </div>
+  -->
+
+
+<div class="categories-grid">
+    {% for card in categorias_cards %}
+        <a href="{% url 'categoria_detalhe' card.slug %}" class="card-item card-{{ card.slug }}" style="background-image: url('{{ card.imagem_fundo.url }}'); background-size: cover; background-position: center; min-height: 120px; border-radius: 8px; padding: 15px; display: flex; align-items: flex-end; text-decoration: none;">
+            <h3 style="color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); margin: 0;">{{ card.titulo }}</h3>
+        </a>
+    {% empty %}
+        <p style="color: #fff; text-align: center; grid-column: 1 / -1;">Nenhuma categoria cadastrada no Admin ainda.</p>
+    {% endfor %}
+</div>
+
+
+
+
+
 
     <div class="section-title">Ofertas Rápidas</div>
     <div class="section-subtitle">Itens selecionados com desconto líquido em Sats</div>

@@ -67,3 +67,11 @@ class SiteConfigAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # Impede deletar o registro de configuração principal
         return False    
+    
+    
+from .models import CategoriaCard
+
+@admin.register(CategoriaCard)
+class CategoriaCardAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'slug', 'ordem')
+    prepopulated_fields = {'slug': ('titulo',)}    

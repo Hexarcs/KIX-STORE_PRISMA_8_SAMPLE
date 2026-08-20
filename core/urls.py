@@ -25,6 +25,7 @@ urlpatterns = [
     
     # Rota da Categoria
     path('categoria/<str:nome>/', views.categoria_detalhe, name='categoria_detalhe'),
+    path('categoria/<slug:slug>/', views.detalhe_categoria, name='categoria_detalhe'),
 ]
 
 if settings.DEBUG:

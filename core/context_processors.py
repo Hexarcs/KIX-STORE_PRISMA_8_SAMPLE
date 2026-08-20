@@ -14,3 +14,11 @@ def site_config_processor(request):
     return {
         'site_config': SiteConfig.get_solo()
     }    
+    
+    
+from .models import CategoriaCard
+
+def cards_processor(request):
+    return {
+        'categorias_cards': CategoriaCard.objects.all()
+    }    

@@ -76,7 +76,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 # ADICIONE ESTA LINHA AQUI:
                 'core.context_processors.btc_context',    
-                'core.context_processors.site_config_processor',             
+                'core.context_processors.site_config_processor', 
+                'core.context_processors.cards_processor',  # <--- Este aqui            
             ],
         },
     },

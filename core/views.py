@@ -208,3 +208,20 @@ def get_user_profile_api(request):
         'endereco': getattr(profile, 'endereco', 'Não informado') if profile else 'Não informado',
     }
     return JsonResponse(data)
+
+
+from django.shortcuts import get_object_or_404, render
+from .models import CategoriaCard, Produto  # Certifique-se de importar seus models
+
+def detalhe_categoria(request, slug):
+    # Busca a categoria pelo slug ou retorna erro 404 caso não exista
+    categoria = get_object_or_404(CategoriaCard, slug=slug)
+    
+    # Filtra os produtos vinculados a esta categoria (ajuste o campo FK conforme seu model de Produto)
+    produtos = Produto.objects.filter(categoria=categoria)
+    
+    context = {
+        'categoria': categoria,
+        'produtos': produtos,
+    }
+    return render(request, 'categoria.html', context)
