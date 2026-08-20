@@ -146,10 +146,48 @@ class HomeConfig(models.Model):
 #from django.db import models
 
 class SiteConfig(models.Model):
+ #   meta_title = models.CharField(max_length=150, default="Supermercado Itatingax - Economia Real no Ecossistema")
+ #   nome_loja = models.CharField(max_length=100, default="Supermercado Itatingax")
+ #   badge_ecossistema = models.CharField(max_length=100, default="Membro do Ecossistema KIX")
     meta_title = models.CharField(max_length=150, default="Supermercado Itatingax - Economia Real no Ecossistema")
     nome_loja = models.CharField(max_length=100, default="Supermercado Itatingax")
-    badge_ecossistema = models.CharField(max_length=100, default="Membro do Ecossistema KIX")
     
+    # Textos e Cores da Badge
+    badge_ecossistema = models.CharField(max_length=100, default="Membro do Ecossistema KIX")
+    badge_bg_color = models.CharField(max_length=7, default="#f7931a", help_text="Cor de fundo da Badge (Hex: #f7931a)")
+    badge_text_color = models.CharField(max_length=7, default="#000000", help_text="Cor do texto da Badge (Hex: #000000)")
+
+    ######main header##############
+# Estilização Geral do Header
+    header_bg_color = models.CharField(max_length=7, default="#1a1a1a", help_text="Cor de fundo (Hex: #1a1a1a)")
+    header_text_color = models.CharField(max_length=7, default="#ffffff", help_text="Cor do texto principal")
+    sats_color = models.CharField(max_length=7, default="#f7931a", help_text="Cor da palavra Sats (Hex: #f7931a)")
+
+    # Textos e Cores do Carrinho
+    btn_clear_text = models.CharField(max_length=30, default="🗑️ Limpar")
+    btn_clear_color = models.CharField(max_length=7, default="#ff4d4d", help_text="Cor do botão Limpar")
+    
+    btn_pay_text = models.CharField(max_length=30, default="Pagar")
+    btn_pay_bg = models.CharField(max_length=7, default="#28a745", help_text="Fundo do botão Pagar")
+    btn_pay_color = models.CharField(max_length=7, default="#ffffff", help_text="Texto do botão Pagar")
+
+    # Textos e Cores da Autenticação (Logado)
+    auth_greeting = models.CharField(max_length=30, default="Olá,")
+    
+    btn_edit_text = models.CharField(max_length=30, default="Editar Endereço")
+    btn_edit_color = models.CharField(max_length=7, default="#f7931a", help_text="Cor da borda/texto de Editar")
+    
+    btn_logout_text = models.CharField(max_length=30, default="Sair")
+    btn_logout_bg = models.CharField(max_length=7, default="#dc3545", help_text="Fundo do botão Sair")
+    btn_logout_color = models.CharField(max_length=7, default="#ffffff", help_text="Texto do botão Sair")
+
+    # Textos e Cores da Autenticação (Deslogado)
+    btn_login_text = models.CharField(max_length=50, default="Entrar com o Google")
+    btn_login_fallback_text = models.CharField(max_length=50, default="Entrar")
+    btn_login_bg = models.CharField(max_length=7, default="#4285f4", help_text="Fundo do botão Entrar")
+    btn_login_color = models.CharField(max_length=7, default="#ffffff", help_text="Texto do botão Entrar")
+
+    ####################
     # Banner de Pagamento
     exibir_banner = models.BooleanField(default=True)
     banner_titulo = models.CharField(max_length=100, default="⚡ Pagamento Nativo em Satoshis")

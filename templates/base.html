@@ -16,42 +16,60 @@
     
     <button class="theme-toggle-btn" id="theme-toggle" title="Alternar Tema">☀️</button>
 
-    <header>
-        <div class="logo-container">
-            <div class="logo">{{ site_config.nome_loja }}</div>
-            <span class="kix-badge">{{ site_config.badge_ecossistema }}</span>
-        </div>
-
-        <div class="cart-status-widget">
-            <span>🛒 <strong id="cart-counter">0</strong> itens</span>
-            <span class="sats-counter">⚡ <span id="cart-total-sats">0</span> Sats</span>
-            <button id="btn-clear-cart" class="btn-remove" style="display: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; border: none; cursor: pointer;">🗑️ Limpar</button>
-            <button id="btn-pay" class="btn-pay" style="display: none;">Pagar</button>
-        </div>
-
-        <div class="auth-box">
-    {% if user.is_authenticated %}
-        <div class="user-logged" style="display: flex; align-items: center; gap: 10px;">
-            <span>Olá, <strong>{{ user.email }}</strong></span>
-            
-            <a href="{% url 'editar_perfil' %}" 
-               style="background: transparent; border: 1px solid #f7931a; color: #f7931a; padding: 4px 10px; border-radius: 4px; font-size: 12px; text-decoration: none; transition: 0.3s;">
-               Editar Endereço
-            </a>
-
-            <a href="{% url 'account_logout' %}" class="btn-logout">Sair</a>
-        </div>
-    {% else %}
-        {% get_providers as socialaccount_providers %}
-        {% if socialaccount_providers %}
-            <a href="{% provider_login_url 'google' %}" class="btn-auth">Entrar com o Google</a>
-        {% else %}
-            <!-- Fallback para a rota padrao de login do Django / Allauth -->
-            <a href="{% url 'account_login' %}" class="btn-auth">Entrar</a>
-        {% endif %}
-    {% endif %}
+<header style="background-color: {{ site_config.header_bg_color }}; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    
+<div class="logo-container" style="display: flex; align-items: center; gap: 10px;">
+    <div class="logo">{{ site_config.nome_loja }}</div>
+    <span class="kix-badge" style="background-color: {{ site_config.badge_bg_color }}; color: {{ site_config.badge_text_color }};">
+        {{ site_config.badge_ecossistema }}
+    </span>
 </div>
-    </header>
+
+    <!-- Carrinho -->
+    <div style="display: flex; align-items: center; gap: 15px; color: {{ site_config.header_text_color }}; font-size: 14px;">
+        <span>🛒 <strong id="cart-counter">0</strong> itens</span>
+        
+        <span style="color: {{ site_config.sats_color }}; font-weight: bold;">
+            ⚡ <span id="cart-total-sats">0</span> Sats
+        </span>
+        
+        <button id="btn-clear-cart" style="display: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; background: transparent; border: 1px solid {{ site_config.btn_clear_color }}; color: {{ site_config.btn_clear_color }};">
+            {{ site_config.btn_clear_text }}
+        </button>
+        
+        <button id="btn-pay" style="display: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; background-color: {{ site_config.btn_pay_bg }}; color: {{ site_config.btn_pay_color }};">
+            {{ site_config.btn_pay_text }}
+        </button>
+    </div>
+
+    <!-- Box de Autenticação -->
+    <div style="display: flex; align-items: center;">
+        {% if user.is_authenticated %}
+            <div style="display: flex; align-items: center; gap: 10px; color: {{ site_config.header_text_color }}; font-size: 14px;">
+                <span>{{ site_config.auth_greeting }} <strong>{{ user.email }}</strong></span>
+                
+                <a href="{% url 'editar_perfil' %}" style="background: transparent; border: 1px solid {{ site_config.btn_edit_color }}; color: {{ site_config.btn_edit_color }}; padding: 4px 10px; border-radius: 4px; font-size: 12px; text-decoration: none; transition: 0.3s;">
+                    {{ site_config.btn_edit_text }}
+                </a>
+
+                <a href="{% url 'account_logout' %}" style="padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; background-color: {{ site_config.btn_logout_bg }}; color: {{ site_config.btn_logout_color }};">
+                    {{ site_config.btn_logout_text }}
+                </a>
+            </div>
+        {% else %}
+            {% get_providers as socialaccount_providers %}
+            {% if socialaccount_providers %}
+                <a href="{% provider_login_url 'google' %}" style="padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; background-color: {{ site_config.btn_login_bg }}; color: {{ site_config.btn_login_color }};">
+                    {{ site_config.btn_login_text }}
+                </a>
+            {% else %}
+                <a href="{% url 'account_login' %}" style="padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; background-color: {{ site_config.btn_login_bg }}; color: {{ site_config.btn_login_color }};">
+                    {{ site_config.btn_login_fallback_text }}
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+</header>
 
 {% if site_config.exibir_banner %}
     <div class="banner">

@@ -52,11 +52,38 @@ from .models import SiteConfig
 class SiteConfigAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Configurações de Header e SEO', {
-            'fields': ('meta_title', 'nome_loja', 'badge_ecossistema')
+            'fields': ('meta_title', 'nome_loja', 'badge_ecossistema', 'badge_bg_color', 'badge_text_color')
         }),
         ('Configurações do Banner', {
             'fields': ('exibir_banner', 'banner_titulo', 'banner_texto', 'exibir_cotacao', 'banner_texto_economia')
         }),
+        ##########################
+    #    ('Configurações de Header e SEO', {
+      #      'fields': ('meta_title', 'nome_loja', 'badge_ecossistema')
+     #   }),
+        ('Estilização do Header (Cores e Layout)', {
+            'fields': ('header_bg_color', 'header_text_color', 'sats_color')
+        }),
+        ('Botões do Carrinho (Textos e Cores)', {
+            'fields': (
+                ('btn_clear_text', 'btn_clear_color'),
+                ('btn_pay_text', 'btn_pay_bg', 'btn_pay_color')
+            )
+        }),
+        ('Autenticação - Usuário Logado', {
+            'fields': (
+                'auth_greeting',
+                ('btn_edit_text', 'btn_edit_color'),
+                ('btn_logout_text', 'btn_logout_bg', 'btn_logout_color')
+            )
+        }),
+        ('Autenticação - Visitante', {
+            'fields': (
+                'btn_login_text', 'btn_login_fallback_text', 
+                ('btn_login_bg', 'btn_login_color')
+            )
+        }),
+        #########################
     )
     def has_add_permission(self, request):
         # Impede criar mais de uma instância de configuração
