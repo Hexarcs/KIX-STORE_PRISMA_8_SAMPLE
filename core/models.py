@@ -146,6 +146,7 @@ class HomeConfig(models.Model):
 #from django.db import models
 
 class SiteConfig(models.Model):
+    meta_title = models.CharField(max_length=150, default="Supermercado Itatingax - Economia Real no Ecossistema")
     nome_loja = models.CharField(max_length=100, default="Supermercado Itatingax")
     badge_ecossistema = models.CharField(max_length=100, default="Membro do Ecossistema KIX")
     

@@ -51,8 +51,8 @@ from .models import SiteConfig
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Configurações de Header', {
-            'fields': ('nome_loja', 'badge_ecossistema')
+        ('Configurações de Header e SEO', {
+            'fields': ('meta_title', 'nome_loja', 'badge_ecossistema')
         }),
         ('Configurações do Banner', {
             'fields': ('exibir_banner', 'banner_titulo', 'banner_texto', 'exibir_cotacao', 'banner_texto_economia')
