@@ -72,18 +72,28 @@
 </header>
 
 {% if site_config.exibir_banner %}
-    <div class="banner">
-        <h2>{{ site_config.banner_titulo }}</h2>
-        <p>{{ site_config.banner_texto }}</p>
+    <div style="background-color: {{ site_config.banner_bg_color }}; padding: 25px; border-radius: 12px; text-align: center; margin-bottom: 30px;">
         
-        <div class="banner-cotacao" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);">
+        <h2 style="color: {{ site_config.banner_title_color }}; margin-top: 0; margin-bottom: 10px;">
+            {{ site_config.banner_titulo }}
+        </h2>
+        
+        <p style="color: {{ site_config.banner_text_color }}; margin-bottom: 0;">
+            {{ site_config.banner_texto }}
+        </p>
+        
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid {{ site_config.banner_border_color }};">
             {% if site_config.exibir_cotacao and btc_preco %}
-                <p>Preço atual do Bitcoin: <strong>R$ {{ btc_preco|floatformat:2 }}</strong></p>
+                <p style="color: {{ site_config.banner_cotacao_color }}; margin: 5px 0;">
+                    {{ site_config.banner_texto_cotacao }} <strong>R$ {{ btc_preco|floatformat:2 }}</strong>
+                </p>
             {% endif %}
-            <p style="font-size: 0.95em; color: #ffb703;">
+            
+            <p style="font-size: 0.95em; color: {{ site_config.banner_economia_color }}; margin: 5px 0;">
                 {{ site_config.banner_texto_economia }}
             </p>
         </div>
+        
     </div>
 {% endif %}
     </div>

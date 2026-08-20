@@ -54,22 +54,33 @@ class SiteConfigAdmin(admin.ModelAdmin):
         ('Configurações de Header e SEO', {
             'fields': ('meta_title', 'nome_loja', 'badge_ecossistema', 'badge_bg_color', 'badge_text_color')
         }),
-        ('Configurações do Banner', {
-            'fields': ('exibir_banner', 'banner_titulo', 'banner_texto', 'exibir_cotacao', 'banner_texto_economia')
+        
+        ('Configurações do Banner (Textos e Exibição)', {
+            'fields': (
+                ('exibir_banner', 'exibir_cotacao'),
+                'banner_titulo', 'banner_texto', 
+                'banner_texto_cotacao', 'banner_texto_economia'
+            )
         }),
-        ##########################
-    #    ('Configurações de Header e SEO', {
-      #      'fields': ('meta_title', 'nome_loja', 'badge_ecossistema')
-     #   }),
+        
+        ('Estilização do Banner (Cores)', {
+            'fields': (
+                'banner_bg_color', 'banner_title_color', 'banner_text_color',
+                'banner_border_color', 'banner_cotacao_color', 'banner_economia_color'
+            )
+        }),
+
         ('Estilização do Header (Cores e Layout)', {
             'fields': ('header_bg_color', 'header_text_color', 'sats_color')
         }),
+        
         ('Botões do Carrinho (Textos e Cores)', {
             'fields': (
                 ('btn_clear_text', 'btn_clear_color'),
                 ('btn_pay_text', 'btn_pay_bg', 'btn_pay_color')
             )
         }),
+        
         ('Autenticação - Usuário Logado', {
             'fields': (
                 'auth_greeting',
@@ -77,14 +88,15 @@ class SiteConfigAdmin(admin.ModelAdmin):
                 ('btn_logout_text', 'btn_logout_bg', 'btn_logout_color')
             )
         }),
+        
         ('Autenticação - Visitante', {
             'fields': (
                 'btn_login_text', 'btn_login_fallback_text', 
                 ('btn_login_bg', 'btn_login_color')
             )
         }),
-        #########################
     )
+
     def has_add_permission(self, request):
         # Impede criar mais de uma instância de configuração
         if self.model.objects.exists():
@@ -93,7 +105,7 @@ class SiteConfigAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         # Impede deletar o registro de configuração principal
-        return False    
+        return False
     
     
 from .models import CategoriaCard

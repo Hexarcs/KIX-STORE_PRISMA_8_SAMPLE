@@ -146,9 +146,7 @@ class HomeConfig(models.Model):
 #from django.db import models
 
 class SiteConfig(models.Model):
- #   meta_title = models.CharField(max_length=150, default="Supermercado Itatingax - Economia Real no Ecossistema")
- #   nome_loja = models.CharField(max_length=100, default="Supermercado Itatingax")
- #   badge_ecossistema = models.CharField(max_length=100, default="Membro do Ecossistema KIX")
+    # SEO e Nomenclatura
     meta_title = models.CharField(max_length=150, default="Supermercado Itatingax - Economia Real no Ecossistema")
     nome_loja = models.CharField(max_length=100, default="Supermercado Itatingax")
     
@@ -157,8 +155,7 @@ class SiteConfig(models.Model):
     badge_bg_color = models.CharField(max_length=7, default="#f7931a", help_text="Cor de fundo da Badge (Hex: #f7931a)")
     badge_text_color = models.CharField(max_length=7, default="#000000", help_text="Cor do texto da Badge (Hex: #000000)")
 
-    ######main header##############
-# Estilização Geral do Header
+    # Estilização Geral do Header
     header_bg_color = models.CharField(max_length=7, default="#1a1a1a", help_text="Cor de fundo (Hex: #1a1a1a)")
     header_text_color = models.CharField(max_length=7, default="#ffffff", help_text="Cor do texto principal")
     sats_color = models.CharField(max_length=7, default="#f7931a", help_text="Cor da palavra Sats (Hex: #f7931a)")
@@ -173,10 +170,8 @@ class SiteConfig(models.Model):
 
     # Textos e Cores da Autenticação (Logado)
     auth_greeting = models.CharField(max_length=30, default="Olá,")
-    
     btn_edit_text = models.CharField(max_length=30, default="Editar Endereço")
     btn_edit_color = models.CharField(max_length=7, default="#f7931a", help_text="Cor da borda/texto de Editar")
-    
     btn_logout_text = models.CharField(max_length=30, default="Sair")
     btn_logout_bg = models.CharField(max_length=7, default="#dc3545", help_text="Fundo do botão Sair")
     btn_logout_color = models.CharField(max_length=7, default="#ffffff", help_text="Texto do botão Sair")
@@ -187,15 +182,22 @@ class SiteConfig(models.Model):
     btn_login_bg = models.CharField(max_length=7, default="#4285f4", help_text="Fundo do botão Entrar")
     btn_login_color = models.CharField(max_length=7, default="#ffffff", help_text="Texto do botão Entrar")
 
-    ####################
-    # Banner de Pagamento
-    exibir_banner = models.BooleanField(default=True)
-    banner_titulo = models.CharField(max_length=100, default="⚡ Pagamento Nativo em Satoshis")
-    banner_texto = models.TextField(default="Logística integrada ao Ecossistema KIX. Economia real direto no caixa utilizando a eficiência da Lightning Network.")
+    # Configurações do Banner (Textos e Exibição)
+    exibir_banner = models.BooleanField(default=True, help_text="Exibir o banner promocional no topo?")
+    exibir_cotacao = models.BooleanField(default=True, help_text="Exibir a cotação do Bitcoin dentro do banner?")
     
-    # Cotação
-    exibir_cotacao = models.BooleanField(default=True)
+    banner_titulo = models.CharField(max_length=150, default="⚡ Pagamento Nativo em Satoshis")
+    banner_texto = models.TextField(default="Logística integrada ao Ecossistema KIX. Economia real direto no caixa utilizando a eficiência da Lightning Network.")
+    banner_texto_cotacao = models.CharField(max_length=50, default="Preço atual do Bitcoin:")
     banner_texto_economia = models.TextField(default="💡 É possível pagar utilizando o Pix estatal, mas o valor pagando direto em Satoshis é 10% menor!")
+
+    # Estilização do Banner (Cores)
+    banner_bg_color = models.CharField(max_length=7, default="#222222", help_text="Cor de fundo do banner (Hex: #222222)")
+    banner_title_color = models.CharField(max_length=7, default="#ffffff", help_text="Cor do título do banner")
+    banner_text_color = models.CharField(max_length=7, default="#dddddd", help_text="Cor do texto descritivo")
+    banner_border_color = models.CharField(max_length=30, default="rgba(255,255,255,0.2)", help_text="Cor da linha divisória (Hex ou RGBA)")
+    banner_cotacao_color = models.CharField(max_length=7, default="#ffffff", help_text="Cor do texto do preço do BTC")
+    banner_economia_color = models.CharField(max_length=7, default="#ffb703", help_text="Cor da mensagem de economia (Hex: #ffb703)")
 
     def save(self, *args, **kwargs):
         # Garante que sempre haverá apenas uma linha de configuração (Singleton)
@@ -208,7 +210,7 @@ class SiteConfig(models.Model):
         return obj
 
     def __str__(self):
-        return "Configurações do Site"        
+        return "Configurações do Site"
     
     
 #---------categorias------------------
