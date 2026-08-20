@@ -50,6 +50,14 @@ from .models import SiteConfig
 
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Configurações de Header', {
+            'fields': ('nome_loja', 'badge_ecossistema')
+        }),
+        ('Configurações do Banner', {
+            'fields': ('exibir_banner', 'banner_titulo', 'banner_texto', 'exibir_cotacao', 'banner_texto_economia')
+        }),
+    )
     def has_add_permission(self, request):
         # Impede criar mais de uma instância de configuração
         if self.model.objects.exists():

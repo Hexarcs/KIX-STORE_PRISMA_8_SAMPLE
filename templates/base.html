@@ -53,18 +53,21 @@
 </div>
     </header>
 
+{% if site_config.exibir_banner %}
     <div class="banner">
-        <h2>⚡ Pagamento Nativo em Satoshis</h2>
-        <p>Logística integrada ao <strong>Ecossistema KIX</strong>. Economia real direto no caixa utilizando a eficiência da Lightning Network.</p>
+        <h2>{{ site_config.banner_titulo }}</h2>
+        <p>{{ site_config.banner_texto }}</p>
         
         <div class="banner-cotacao" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);">
-            {% if btc_preco %}
+            {% if site_config.exibir_cotacao and btc_preco %}
                 <p>Preço atual do Bitcoin: <strong>R$ {{ btc_preco|floatformat:2 }}</strong></p>
             {% endif %}
             <p style="font-size: 0.95em; color: #ffb703;">
-                💡 É possível pagar utilizando o <strong>Pix estatal</strong>, mas o valor pagando direto em <strong>Satoshis é 10% menor</strong>!
+                {{ site_config.banner_texto_economia }}
             </p>
         </div>
+    </div>
+{% endif %}
     </div>
 
     <main>

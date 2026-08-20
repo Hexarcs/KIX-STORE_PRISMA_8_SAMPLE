@@ -148,6 +148,15 @@ class HomeConfig(models.Model):
 class SiteConfig(models.Model):
     nome_loja = models.CharField(max_length=100, default="Supermercado Itatingax")
     badge_ecossistema = models.CharField(max_length=100, default="Membro do Ecossistema KIX")
+    
+    # Banner de Pagamento
+    exibir_banner = models.BooleanField(default=True)
+    banner_titulo = models.CharField(max_length=100, default="⚡ Pagamento Nativo em Satoshis")
+    banner_texto = models.TextField(default="Logística integrada ao Ecossistema KIX. Economia real direto no caixa utilizando a eficiência da Lightning Network.")
+    
+    # Cotação
+    exibir_cotacao = models.BooleanField(default=True)
+    banner_texto_economia = models.TextField(default="💡 É possível pagar utilizando o Pix estatal, mas o valor pagando direto em Satoshis é 10% menor!")
 
     def save(self, *args, **kwargs):
         # Garante que sempre haverá apenas uma linha de configuração (Singleton)
@@ -161,3 +170,7 @@ class SiteConfig(models.Model):
 
     def __str__(self):
         return "Configurações do Site"        
+
+
+
+
