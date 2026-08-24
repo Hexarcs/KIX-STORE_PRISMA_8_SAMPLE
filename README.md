@@ -1,81 +1,157 @@
-# 🛒 Supermercado KIX
+# Tutorial: Automatizando a Criação de uma Nova Instância (Loja) via Script Shell
 
-Um portal de e-commerce e caixa de atendimento integrado ao **Ecossistema KIX**, desenvolvido em Python e Django. O sistema permite liquidação nativa de pagamentos em **Bitcoin / Satoshis via Lightning Network** (com desconto) ou integração com pagamentos tradicionais.
+Este guia prático ensina como criar e utilizar um script automatizado para subir uma nova instância isolada do sistema na porta `8007`.
 
-> ⚠️ **Status do Projeto:** Atualmente rodando em arquitetura **Django Baremetal**. A gestão de produtos, categorias, preços e mídias é realizada diretamente pelo painel administrativo nativo do Django (`/admin`).
+A instância será criada na pasta `~/Hexarcs_loja`, terá volumes persistentes para `data` e `media`, um arquivo `.env` com variáveis de configuração e um `docker-compose.yml` configurado para criar automaticamente o superusuário do Django.
 
----
+## Passo 1: Criar o arquivo do script
 
-## 🚀 Guia de Inicialização Rápida (Para Novatos)
+Abra o terminal e crie o arquivo de automação usando o editor `nano`:
 
-Se você acabou de clonar o repositório, siga o passo a passo abaixo para "compilar" a aplicação no seu ambiente local (instalar dependências, preparar o banco de dados e subir o servidor).
-
-### 1. Clonar o Repositório
 ```bash
-git clone https://github.com/Hexarcs/supermercado_kix.git
-cd supermercado_kix
+nano criar_loja_8007.sh
 ```
 
-### 2. Criar e Ativar o Ambiente Virtual (`venv`)
+## Passo 2: Inserir o código do script
+
+Cole o conteúdo abaixo dentro do editor.
+
+> **Nota:** As credenciais e chaves sensíveis foram substituídas por placeholders educativos, como `suaapikeycoinsaqui`, `suaapikeylnbitsaqui` e `SuaSenhaSeguraAqui`.
+
 ```bash
-# Cria o ambiente virtual isolado
-python3 -m venv venv
+#!/bin/bash
 
-# Ativa o venv no Linux/macOS
-source venv/bin/activate
+# Define o diretório da nova loja na home
+LOJA_DIR="$HOME/Hexarcs_loja"
 
-# (No Windows PowerShell use: .\venv\Scripts\Activate.ps1)
-```
+echo "Criando a estrutura da nova loja em: $LOJA_DIR..."
+mkdir -p "$LOJA_DIR/data"
+mkdir -p "$LOJA_DIR/media"
 
-### 3. Instalar as Dependências do Python
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configurar as Variáveis de Ambiente (`.env`)
-Crie um arquivo chamado `.env` na raiz do projeto com o seguinte conteúdo base:
-
-```env
-SECRET_KEY=sua-chave-secreta-django-dev
+# Cria o arquivo .env com valores de aprendizado/exemplo
+echo "Escrevendo o arquivo .env..."
+cat << 'EOF' > "$LOJA_DIR/.env"
+COINAPI_KEY=suaapikeycoinsaqui
+LNBITS_API_KEY=suaapikeylnbitsaqui
+LNBITS_URL=https://seuendpointlnbitsaqui/api/v1/payments
+SECRET_KEY=django-insecure-suachavesecretadeaprendizadoaqui
 DEBUG=True
 ALLOWED_HOSTS=*
-COINAPI_KEY=sua_chave_coinapi_aqui
-LNBITS_API_KEY=sua_chave_lnbits_aqui
-LNBITS_URL=https://sua-instancia-lnbits/api/v1/payments
+EOF
+
+# Cria o arquivo docker-compose.yml
+echo "Criando o docker-compose.yml..."
+cat << 'EOF' > "$LOJA_DIR/docker-compose.yml"
+services:
+  web:
+    image: zeloko/supermercado-kix:latest
+    container_name: hexarcs_loja_8007
+
+    ports:
+      - "8007:8000"
+
+    volumes:
+      - ./data:/app/data
+      - ./media:/app/media
+
+    env_file:
+      - .env
+
+    environment:
+      - DEBUG=1
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_EMAIL=admin@exemplo.com
+      - DJANGO_SUPERUSER_PASSWORD=SuaSenhaSeguraAqui
+
+    command: >
+      sh -c "python manage.py migrate &&
+      python manage.py createsuperuser --noinput || true &&
+      python manage.py runserver 0.0.0.0:8000"
+
+    restart: unless-stopped
+EOF
+
+# Ajusta as permissões de dono da pasta
+sudo chown -R "$USER:$USER" "$LOJA_DIR"
+
+echo "Tudo pronto! Subindo o container da nova loja na porta 8007..."
+cd "$LOJA_DIR"
+docker compose up -d
+
+echo "Loja criada e rodando com sucesso!"
 ```
 
-### 5. Preparar o Banco de Dados (Migrations)
-Execute as migrações para criar as tabelas necessárias no SQLite:
+> **Dica do Nano:** Pressione `Ctrl + O` e depois `Enter` para salvar. Em seguida, pressione `Ctrl + X` para sair do editor.
+
+## Passo 3: Conceder permissão de execução
+
+Com o script salvo, torne-o executável:
 
 ```bash
-python manage.py migrate
+chmod +x criar_loja_8007.sh
 ```
 
-### 6. Criar o Usuário Administrador
-Crie o acesso para gerenciar a loja pelo painel do Django:
+## Passo 4: Executar o script
+
+Execute o script diretamente no terminal:
 
 ```bash
-python manage.py createsuperuser
+./criar_loja_8007.sh
 ```
 
-### 7. Subir a Aplicação
-Inicie o servidor de desenvolvimento na porta desejada (ex: `8000` ou `9889`):
+O script irá automaticamente:
+
+1. Criar a pasta `~/Hexarcs_loja`.
+2. Criar os diretórios persistentes `data` e `media`.
+3. Criar o arquivo `.env`.
+4. Criar o `docker-compose.yml`.
+5. Configurar a aplicação na porta `8007`.
+6. Executar as migrações do Django.
+7. Criar o superusuário `admin`.
+8. Iniciar o container Docker em segundo plano.
+
+Ao final, a loja estará disponível na porta:
+
+```text
+http://SEU_SERVIDOR:8007
+```
+
+## Estrutura criada
+
+A estrutura final será semelhante a:
+
+```text
+~/Hexarcs_loja/
+├── .env
+├── docker-compose.yml
+├── data/
+└── media/
+```
+
+O container será executado com o nome:
+
+```text
+hexarcs_loja_8007
+```
+
+## Verificar o container
+
+Para verificar se a loja está rodando:
 
 ```bash
-python manage.py runserver 0.0.0.0:8000
+docker ps
 ```
 
-Acesse no seu navegador: **`http://localhost:8000`**
+Para visualizar os logs:
 
----
+```bash
+cd ~/Hexarcs_loja
+docker compose logs -f
+```
 
-## 🛠️ Personalização via Django Admin
+Para parar a loja:
 
-Como a estrutura atual roda em formato *baremetal*, toda a customização da loja é feita pelo painel `/admin`:
-
-1. Acesse `http://localhost:8000/admin` e faça login com a conta criada no `createsuperuser`.
-2. **Produtos & Categorias:** Cadastre os itens que aparecerão na vitrine principal.
-3. **Login Social (Opcional):** Se desejar ativar o login via Google em ambiente local, navegue até **Social Accounts > Social Applications** e associe a aplicação Google ao `Site ID 1`. Caso não cadastre, o sistema utilizará a tela de login tradicional automaticamente.
-
----
-
+```bash
+cd ~/Hexarcs_loja
+docker compose down
+```
