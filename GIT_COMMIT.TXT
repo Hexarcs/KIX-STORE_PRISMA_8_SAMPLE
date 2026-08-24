@@ -6,3 +6,9 @@ git commit -m "Initial commit - KIX Store Prisma 8 Sample (Sanitizado)"
 
 # 3. Envia para o repositório no GitHub
 git push -u origin main
+
+#verifica as mudanças
+
+git status
+git add .
+git status
