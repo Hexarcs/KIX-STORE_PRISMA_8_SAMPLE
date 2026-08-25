@@ -158,12 +158,29 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Customizações do Allauth (Sintaxe Estrita Atualizada)
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*']  # O '*' resolve o erro crítico de e-mail obrigatório
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+#ACCOUNT_LOGIN_METHODS = {'email'}
+#ACCOUNT_SIGNUP_FIELDS = ['email*']  # O '*' resolve o erro crítico de e-mail obrigatório
+#ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+#ACCOUNT_SESSION_REMEMBER = True
+
+# --- CONFIGURAÇÕES DO ALLAUTH (LOGIN LOCAL + GOOGLE) ---
+# Permite entrar tanto digitando e-mail quanto username
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+
+# Exige o campo de e-mail no cadastro local
+#ACCOUNT_SIGNUP_FIELDS = ['email*']
+
+# Desativa o bloqueio de conta pendente de confirmação de e-mail
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Libera o cadastro local por formulário tradicional e mantém o login social
+ACCOUNT_ALLOW_REGISTRATION = True
+SOCIALACCOUNT_ONLY = False
+
+# Mantém a sessão salva
 ACCOUNT_SESSION_REMEMBER = True
 
-# Envia os e-mails de confirmação para o console do servidor por enquanto
+# Envia e-mails de desenvolvimento para o console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 import os

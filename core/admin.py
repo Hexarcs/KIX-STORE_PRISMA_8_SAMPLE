@@ -51,8 +51,8 @@ from .models import SiteConfig
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Configurações de Header e SEO', {
-            'fields': ('meta_title', 'nome_loja', 'badge_ecossistema', 'badge_bg_color', 'badge_text_color')
+         ('Configurações de Header e SEO', {
+            'fields': ('meta_title', 'nome_loja', 'logo', 'badge_ecossistema')
         }),
         
         ('Configurações do Banner (Textos e Exibição)', {
@@ -95,6 +95,7 @@ class SiteConfigAdmin(admin.ModelAdmin):
                 ('btn_login_bg', 'btn_login_color')
             )
         }),
+        
     )
 
     def has_add_permission(self, request):

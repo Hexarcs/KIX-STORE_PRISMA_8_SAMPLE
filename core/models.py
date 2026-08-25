@@ -147,6 +147,7 @@ class HomeConfig(models.Model):
 
 class SiteConfig(models.Model):
     # SEO e Nomenclatura
+    logo = models.ImageField(upload_to='site/', blank=True, null=True, verbose_name="Logo do Site")
     meta_title = models.CharField(max_length=150, default="Supermercado Itatingax - Economia Real no Ecossistema")
     nome_loja = models.CharField(max_length=100, default="Supermercado Itatingax")
     
