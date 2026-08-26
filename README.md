@@ -64,14 +64,16 @@ LOJA_DIR="."
 
 echo "[0/3] Escrevendo o arquivo .env..."
 
-cat << 'EOF' > "$LOJA_DIR/.env"
+cat > "$LOJA_DIR/.env" <<'KIX_ENV_FILE'
 COINAPI_KEY=suaapikeycoinsaqui
 LNBITS_API_KEY=suaapikeylnbitsaqui
 LNBITS_URL=https://seuendpointlnbitsaqui/api/v1/payments
 SECRET_KEY=django-insecure-suachavesecretadeaprendizadoaqui
 DEBUG=True
 ALLOWED_HOSTS=*
-EOF
+KIX_ENV_FILE
+
+echo "[OK] .env criado."
 
 # ================================================================
 # 1. CRIA O entrypoint.sh
@@ -79,75 +81,221 @@ EOF
 
 echo "[1/3] Criando entrypoint.sh..."
 
-cat << 'EOF' > entrypoint.sh
+cat > entrypoint.sh <<'KIX_ENTRYPOINT_FILE'
 #!/bin/sh
 
+set -e
+
+echo "=============================================="
+echo "  KIX STORE - ENTRYPOINT"
+echo "=============================================="
+
+# ================================================================
+# 1. APLICA CONFIGURACOES NO SETTINGS.PY
+# ================================================================
+
+echo "[1/4] Aplicando configuracoes do Django..."
+
 python -c "
-import os, django
+import os
+import sys
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 
-try:
-    from django.conf import settings
-    import sys
+from django.conf import settings
 
-    mod = sys.modules[settings.SETTINGS_MODULE]
-    settings_file = mod.__file__
+settings_module = settings.SETTINGS_MODULE
+mod = sys.modules[settings_module]
+settings_file = mod.__file__
 
-    with open(settings_file, 'r') as f:
-        content = f.read()
+print('[INFO] SETTINGS_MODULE:', settings_module)
+print('[INFO] settings.py:', settings_file)
 
-    if 'SOCIALACCOUNT_ONLY' not in content:
-        with open(settings_file, 'a') as f:
-            f.write('''
+with open(settings_file, 'r') as f:
+    content = f.read()
 
-# --- CONFIGURACOES DE PROXY E CSRF IRRESTRITAS ---
+# ================================================================
+# MARCADORES DO BLOCO KIX
+# ================================================================
+
+start_marker = '# KIX DEPLOY CONFIG - START'
+end_marker = '# KIX DEPLOY CONFIG - END'
+
+# ================================================================
+# CONFIGURACAO OFICIAL KIX
+# ================================================================
+
+kix_config = '''
+# ================================================================
+# KIX DEPLOY CONFIG - START
+# ================================================================
+
+# --- CONFIGURACOES DE HOST / PROXY ---
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*']
+
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# --- CONFIGURACOES CSRF ---
+CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*']
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = False
 
-# --- AJUSTES DO ALLAUTH PARA CADASTRO/LOGIN LOCAL ---
+# --- CONFIGURACOES DO ALLAUTH ---
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_ALLOW_REGISTRATION = True
 SOCIALACCOUNT_ONLY = False
-''')
-        print(f'Configuracoes do Allauth injetadas em: {settings_file}')
-    else:
-        print('Configuracoes do Allauth ja presentes.')
 
-except Exception as e:
-    print(f'Erro ao injetar configuracoes: {e}')
+# ================================================================
+# KIX DEPLOY CONFIG - END
+# ================================================================
+'''
+
+# ================================================================
+# REMOVE QUALQUER BLOCO KIX ANTERIOR
+# ================================================================
+
+start_pos = content.find(start_marker)
+
+if start_pos != -1:
+
+    end_pos = content.find(end_marker, start_pos)
+
+    if end_pos != -1:
+
+        end_pos += len(end_marker)
+
+        content = (
+            content[:start_pos].rstrip()
+            + '\\n\\n'
+            + content[end_pos:].lstrip()
+        )
+
+        print('[INFO] Bloco KIX anterior removido.')
+
+    else:
+
+        print('[WARN] Inicio do bloco KIX encontrado, mas final nao.')
+        print('[WARN] Nenhuma alteracao parcial sera removida.')
+
+# ================================================================
+# ADICIONA O BLOCO OFICIAL NOVAMENTE
+# ================================================================
+
+content = content.rstrip()
+content += '\\n\\n' + kix_config.strip() + '\\n'
+
+with open(settings_file, 'w') as f:
+    f.write(content)
+
+print('[OK] Configuracoes KIX aplicadas.')
+
+# ================================================================
+# VALIDACAO
+# ================================================================
+
+with open(settings_file, 'r') as f:
+    final_content = f.read()
+
+required = [
+    'ALLOWED_HOSTS',
+    'CSRF_TRUSTED_ORIGINS',
+    'USE_X_FORWARDED_HOST',
+    'SECURE_PROXY_SSL_HEADER',
+    'CSRF_COOKIE_SECURE',
+    'CSRF_COOKIE_HTTPONLY',
+    'ACCOUNT_AUTHENTICATION_METHOD',
+    'ACCOUNT_EMAIL_REQUIRED',
+    'ACCOUNT_EMAIL_VERIFICATION',
+    'ACCOUNT_ALLOW_REGISTRATION',
+    'SOCIALACCOUNT_ONLY'
+]
+
+missing = [item for item in required if item not in final_content]
+
+if missing:
+
+    print('[ERRO] Configuracoes ausentes:')
+
+    for item in missing:
+        print('  -', item)
+
+    raise SystemExit(1)
+
+print('[OK] Todas as configuracoes KIX foram verificadas.')
 "
 
+# ================================================================
+# 2. MIGRATIONS
+# ================================================================
+
+echo "[2/4] Executando makemigrations..."
+
 python manage.py makemigrations
+
+echo "[2/4] Executando migrate..."
+
 python manage.py migrate
 
-# Garante superusuário ativo
+# ================================================================
+# 3. GARANTE SUPERUSUARIO
+# ================================================================
+
+echo "[3/4] Garantindo superusuario..."
+
 python -c "
-import os, django
+import os
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from django.contrib.auth import get_user_model
+
 User = get_user_model()
 
 username = os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin')
 email = os.getenv('DJANGO_SUPERUSER_EMAIL', 'zeloko@example.com')
 password = os.getenv('DJANGO_SUPERUSER_PASSWORD', 'Industria12!')
 
-user, created = User.objects.get_or_create(username=username, defaults={'email': email, 'is_staff': True, 'is_superuser': True})
+user, created = User.objects.get_or_create(
+    username=username,
+    defaults={
+        'email': email,
+        'is_staff': True,
+        'is_superuser': True
+    }
+)
+
 user.set_password(password)
 user.is_staff = True
 user.is_superuser = True
 user.save()
+
+if created:
+    print('[OK] Superusuario criado:', username)
+else:
+    print('[OK] Superusuario atualizado:', username)
 "
 
-python manage.py runserver 0.0.0.0:8000
-EOF
+# ================================================================
+# 4. INICIA DJANGO
+# ================================================================
+
+echo "[4/4] Iniciando Django..."
+
+echo "=============================================="
+echo "  KIX STORE PRONTO"
+echo "  ALLAUTH LOCAL + GOOGLE"
+echo "=============================================="
+
+exec python manage.py runserver 0.0.0.0:8000
+
+KIX_ENTRYPOINT_FILE
+
+echo "[OK] entrypoint.sh criado."
 
 # ================================================================
 # 2. CRIA O docker-compose.yml
@@ -155,45 +303,102 @@ EOF
 
 echo "[2/3] Criando docker-compose.yml..."
 
-cat << 'EOF' > docker-compose.yml
+cat > docker-compose.yml <<'KIX_COMPOSE_FILE'
 services:
   web:
     image: zeloko/supermercado-kix:latest
-    container_name: Store
+    container_name: Store_00
+
     ports:
       - "8006:8000"
+
     env_file:
       - .env
+
     volumes:
       - ./data:/app/data
       - ./media:/app/media
       - ./entrypoint.sh:/app/entrypoint.sh
+
     environment:
       - DEBUG=1
       - DJANGO_SUPERUSER_USERNAME=admin
       - DJANGO_SUPERUSER_EMAIL=zeloko
       - DJANGO_SUPERUSER_PASSWORD=Industria12!
+
     command: /bin/sh /app/entrypoint.sh
+
     restart: unless-stopped
-EOF
+KIX_COMPOSE_FILE
+
+echo "[OK] docker-compose.yml criado."
 
 # ================================================================
-# 3. PERMISSÃO E RECRIAÇÃO DO CONTAINER
+# 3. VALIDACAO DOS ARQUIVOS
 # ================================================================
 
-echo "[3/3] Aplicando permissões..."
+echo "[3/3] Validando arquivos..."
+
+if [ ! -s .env ]; then
+    echo "[ERRO] .env nao foi criado corretamente."
+    exit 1
+fi
+
+if [ ! -s entrypoint.sh ]; then
+    echo "[ERRO] entrypoint.sh nao foi criado corretamente."
+    exit 1
+fi
+
+if [ ! -s docker-compose.yml ]; then
+    echo "[ERRO] docker-compose.yml nao foi criado corretamente."
+    exit 1
+fi
+
+if ! grep -q "KIX STORE - ENTRYPOINT" entrypoint.sh; then
+    echo "[ERRO] entrypoint.sh parece estar incompleto."
+    exit 1
+fi
+
+if ! grep -q "container_name: Store_00" docker-compose.yml; then
+    echo "[ERRO] docker-compose.yml parece estar incompleto."
+    exit 1
+fi
+
+echo "[OK] Todos os arquivos foram criados corretamente."
+
+# ================================================================
+# 4. PERMISSOES
+# ================================================================
+
 chmod +x entrypoint.sh
 
+# ================================================================
+# 5. RECRIA O CONTAINER
+# ================================================================
+
 echo "[INFO] Limpando containers antigos..."
+
 docker compose down -v || true
 
 echo "[INFO] Subindo o novo container..."
+
 docker compose up -d
+
+# ================================================================
+# FINAL
+# ================================================================
 
 echo ""
 echo "=============================================="
-echo "  KIX STORE PRONTO (LOGIN LOCAL + GOOGLE)"
+echo "  KIX STORE PRONTO"
 echo "=============================================="
+echo ""
+echo "Container: Store_00"
+echo "Porta:     8006"
+echo ""
+echo "Para acompanhar os logs:"
+echo "docker compose logs -f"
+echo ""
 ```
 
 Salve com:
